@@ -24,7 +24,9 @@ alumnos_normalizado.describe()
 clustering = KMeans(n_clusters=2, max_iter=300)
 clustering.fit(alumnos_normalizado)
 
-KMeans(algorithm='auto', copy_x=True, init='k-means++', max_iter=300,
+arr = np.array([[20,5,91,88,85,89,98,90.2], [21,7,83,73,92,84,84,83.2]])
+
+KMeans( copy_x=True, init=arr, max_iter=300,
          n_clusters=2, n_init=10, random_state=None, tol=0.0001, verbose=0) 
 
 alumnos['KMeans_Clusters'] = clustering.labels_
