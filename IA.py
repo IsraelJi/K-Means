@@ -2,52 +2,58 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 import os
 
+# Verificar si el archivo existe antes de intentar leerlo
+ruta_archivo = r'C:/Users/crazy/OneDrive/Documentos/ESCUELA/SEM_5/IA/DataAlum/DataAlum.csv'
+alumnos = pd.read_csv(ruta_archivo, engine='python', encoding='latin1')
 
 
-# Verificar si el archivo existe antes de intentar leerl
-alumnos = pd.read_csv(r'C:/Users/crazy/OneDrive/Documentos/ESCUELA/SEM_5/IA/DataAlum/DataAlum.csv', engine='python', encoding='latin1')
-
+# Mostrar información del DataFrame
 alumnos.info()
-alumnos.head()
+print(alumnos.head())
 
+# Eliminar la columna 'Nombre'
 alumnos_variable = alumnos.drop(['Nombre'], axis=1)
 
-alumnos_variable.describe()
-
+# Normalizar los datos
 alumnos_normalizado = (alumnos_variable - alumnos_variable.min()) / (alumnos_variable.max() - alumnos_variable.min())
-alumnos_normalizado
 
-alumnos_normalizado.describe()
-
-clustering = KMeans(n_clusters=2, max_iter=300)
+# Aplicar K-Means
+clustering = KMeans(n_clusters=2, max_iter=300, random_state=42)
 clustering.fit(alumnos_normalizado)
 
-arr = np.array([[20,5,91,88,85,89,98,90.2], [21,7,83,73,92,84,84,83.2]])
-
-KMeans( copy_x=True, init=arr, max_iter=300,
-         n_clusters=2, n_init=10, random_state=None, tol=0.0001, verbose=0) 
-
+# Asignar los clusters al DataFrame original
 alumnos['KMeans_Clusters'] = clustering.labels_
-alumnos.head()
 
-from sklearn.decomposition import PCA
+# Imprimir las etiquetas de los clusters
+print("Etiquetas de los clusters:")
+print(alumnos['KMeans_Clusters'].value_counts())
 
+# Asegurar que los clusters 0 y 1 estén siempre representados por los mismos colores
+color_map = {0: 'blue', 1: 'green'}
+alumnos['Color'] = alumnos['KMeans_Clusters'].map(color_map)
+
+# Aplicar PCA para reducir la dimensionalidad
 pca = PCA(n_components=2)
 alumnos_pca = pca.fit_transform(alumnos_normalizado)
 alumnos_pca_df = pd.DataFrame(data=alumnos_pca, columns=['Componente_1', 'Componente_2'])
-alumnos_pca_nombre = pd.concat([alumnos_pca_df, alumnos[['KMeans_Clusters']]], axis=1)
+alumnos_pca_nombre = pd.concat([alumnos_pca_df, alumnos[['KMeans_Clusters', 'Color']]], axis=1)
 
-alumnos_pca_nombre
 
+
+# Graficar los resultados
 fig = plt.figure(figsize=(6, 6))
 ax = fig.add_subplot(1, 1, 1)
+
 ax.set_xlabel('Componente 1', fontsize=15)
 ax.set_ylabel('Componente 2', fontsize=15)
 ax.set_title('Componentes Principales', fontsize=20)
 
-color_theme = np.array(['blue', 'green','orange'])
-ax.scatter(x=alumnos_pca_nombre.Componente_1, y=alumnos_pca_nombre.Componente_2, c=color_theme[alumnos_pca_nombre.KMeans_Clusters], s=50)
+# Usar los colores definidos en el mapa de colores
+colors = alumnos_pca_nombre['Color'].values
+ax.scatter(x=alumnos_pca_nombre.Componente_1, y=alumnos_pca_nombre.Componente_2, c=colors, s=50)
 
+# Mostrar la gráfica
 plt.show()
