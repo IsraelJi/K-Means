@@ -19,9 +19,11 @@ alumnos_variable = alumnos.drop(['Nombre'], axis=1)
 
 # Normalizar los datos
 alumnos_normalizado = (alumnos_variable - alumnos_variable.min()) / (alumnos_variable.max() - alumnos_variable.min())
+# Arreglo para tener clusters iniciales
+arr=np.array([[20,5,91,88,85,89,98,90.2], [21,7,83,73,92,84,84,82.2]])
 
 # Aplicar K-Means
-clustering = KMeans(n_clusters=2, max_iter=300, random_state=42)
+clustering = KMeans(n_clusters=2, init=arr, n_init=1, max_iter=300, random_state=42)
 clustering.fit(alumnos_normalizado)
 
 # Asignar los clusters al DataFrame original
